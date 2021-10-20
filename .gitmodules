@@ -1,7 +1,13 @@
 [submodule "std-lib"]
 	path = std-lib
 	url = https://github.com/agda/agda-stdlib
-	branch = experimental
+        branch = master
+#	branch = experimental
+# Andreas, 2021-10-20, issue #5605
+# While there are no changes in Agda incompatible with the master branch
+# of the standard library, the std-lib submodule should point to the master.
+# Once Agda breaks compatibility with master, it should point to experimental.
+#
 [submodule "cubical"]
 	path = cubical
 	url = https://github.com/agda/cubical
