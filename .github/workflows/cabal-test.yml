@@ -57,7 +57,7 @@ jobs:
       name: Install dependencies
     - run: |
         mkdir -p ${HOME}/bin
-        cabal install --installdir=${HOME}/bin
+        cabal install --installdir=${HOME}/bin --jobs=1
       name: Install Agda
     - run: |
         export PATH=${HOME}/bin:${PATH}

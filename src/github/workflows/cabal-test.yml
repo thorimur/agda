@@ -101,8 +101,9 @@ jobs:
     - name: Install Agda
       run: |
         mkdir -p ${HOME}/bin
-        cabal install --installdir=${HOME}/bin
+        cabal install --installdir=${HOME}/bin --jobs=1
 # bin instead of .cabal/bin as this might be more portable (Windows)
+# --jobs=1 to get more detailed log
 
     - name: Build and test Agda
       run: |
