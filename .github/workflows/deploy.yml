@@ -54,13 +54,12 @@ jobs:
           echo "::set-output name=content-type::application/x-xz"
           echo "::set-output name=compress-cmd::tar -a -cvf ${filename} ${nightly}"
         elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
-          echo "::set-output name=args::${ARGS} ${MACOS_ARGS}"
+          echo "::set-output name=args::${ARGS} ${LINUX_ARGS}"
           filename="${nightly}-linux.tar.xz"
           echo ::set-output name=exe::agda
           echo "::set-output name=filename::${filename}"
           echo "::set-output name=content-type::application/x-xz"
           echo "::set-output name=compress-cmd::tar -a -cvf ${filename} ${nightly}"
-          echo "::set-output name=args::${ARGS} ${LINUX_ARGS}"
         fi
       name: Set up platform-dependent variables
       id: vars
@@ -76,6 +75,11 @@ jobs:
         ghc-version: ${{ matrix.ghc-ver }}
       uses: haskell/actions/setup@v1
       id: setup-haskell
+    - if: ${{ runner.os == 'Linux' }}
+      run: |
+        ghcup config set url-source '{"OwnSource": "https://raw.githubusercontent.com/haskell/ghcup-metadata/ubuntu20.04/ghcup-0.0.7.yaml"}'
+        ghcup install ghc --force --set 9.2.2
+      name: Force reinstall of GHC 9.2.2 (Linux)
     - if: ${{ runner.os == 'Windows' }}
       shell: pwsh
       run: |
@@ -87,26 +91,10 @@ jobs:
       name: Install the icu4c library (Windows)
     - run: |
         cabal configure ${{ steps.vars.outputs.args }}
-
-        #    - uses: actions/cache@v2
-        #      name: Cache dependencies
-        #      id: cache
-        #      with:
-        #        path: |
-        #          ${{ steps.setup-haskell.outputs.cabal-store }}
-        #        # A unique cache is used for each stack.yaml.
-        #        key: nightly-${{ runner.os }}-ghc-${{ matrix.ghc-ver }}-cabal-${{ hashFiles('**/plan.json') }}
-        #
       name: Configure the build plan
-    - if: ${{ !steps.cache.outputs.cache-hit }}
-      run: cabal build exe:agda exe:agda-mode --only-dependencies -v0
+    - run: cabal build exe:agda exe:agda-mode --only-dependencies -v0
       name: Build dependencies
-    - with:
-        command: cabal build exe:agda exe:agda-mode
-        max_attempts: 3
-        timeout_minutes: 60
-        retry_on: error
-      uses: nick-invision/retry@v2
+    - run: cabal build exe:agda exe:agda-mode
       name: Build Agda
     - env:
         ICU_DIR: /usr/local/opt/icu4c/lib
