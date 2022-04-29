@@ -25,7 +25,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-2022, macos-latest, ubuntu-20.04]
+        os: [windows-2022, macos-latest, ubuntu-18.04]
         ghc-ver: ['9.2']
         cabal-ver: [3.6]
 
@@ -91,13 +91,14 @@ jobs:
         ghc-version: ${{ matrix.ghc-ver }}
         cabal-version: ${{ matrix.cabal-ver }}
 
-    # Workaround suggested in https://gitlab.haskell.org/ghc/ghc/-/issues/21454#note_425291
-    # Force reinstall of GHC 9.2.2 from ubuntu binaries
-    - name: Force reinstall of GHC 9.2.2 (Linux)
-      if: ${{ runner.os == 'Linux' }}
-      run: |
-        ghcup config set url-source '{"OwnSource": "https://raw.githubusercontent.com/haskell/ghcup-metadata/ubuntu20.04/ghcup-0.0.7.yaml"}'
-        ghcup install ghc --force --set 9.2.2
+    # DOES NOT HELP
+    # # Workaround suggested in https://gitlab.haskell.org/ghc/ghc/-/issues/21454#note_425291
+    # # Force reinstall of GHC 9.2.2 from ubuntu binaries
+    # - name: Force reinstall of GHC 9.2.2 (Linux)
+    #   if: ${{ runner.os == 'Linux' }}
+    #   run: |
+    #     ghcup config set url-source '{"OwnSource": "https://raw.githubusercontent.com/haskell/ghcup-metadata/ubuntu20.04/ghcup-0.0.7.yaml"}'
+    #     ghcup install ghc --force --set 9.2.2
 
 
     # from: https://github.com/haskell/text-icu/blob/c73d7fe6f29e178d3ea40160e904ab39236e3c9d/.github/workflows/cabal-mac-win.yml#L29-L32
