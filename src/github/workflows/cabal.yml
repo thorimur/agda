@@ -123,17 +123,32 @@ jobs:
         cabal update
         cabal configure ${FLAGS} -O0
 
-    - uses: actions/cache@v2
-      name: Cache dependencies
-      id: cache
+    # Andreas, 2022-05-03: Following caching logic as exxplained in:
+    # https://github.com/haskell/actions/issues/7#issuecomment-745697160
+    # This rests on the assumption that cabal can deal with stale caches.
+    #
+    # A caveat is: https://github.com/haskell/cabal/issues/8114
+    # GHC has no ABI stability, so if the library binaries shipped
+    # with GHC are updated without a GHC version change, cabal
+    # might not notice this.
+    # It seems that this cannot fixed in this cache action however we
+    # set it up, as we have no identifier for the ABI.
+    - name: Cache dependencies
+      uses: actions/cache@v2
       with:
         path: |
           ${{ steps.setup-haskell.outputs.cabal-store }}
+          dist-newstyle
         # The file `plan.json` contains the build information.
-        key: ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}
+        key: ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}-${{ github.sha }}
+        # The restore keys are sensible prefixes of the current key.
+        restore-keys: |
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}-${{ github.sha }}
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}-
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-
 
     - name: Install dependencies
-      if: ${{ !steps.cache.outputs.cache-hit }}
       run: |
         cabal build --only-dependencies
 

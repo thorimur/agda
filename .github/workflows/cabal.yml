@@ -74,13 +74,17 @@ jobs:
     - with:
         path: |
           ${{ steps.setup-haskell.outputs.cabal-store }}
+          dist-newstyle
         key: ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{
-          hashFiles('**/plan.json') }}
+          hashFiles('**/plan.json') }}-${{ github.sha }}
+        restore-keys: |
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}-${{ github.sha }}
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-${{ hashFiles('**/plan.json') }}-
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-${{ env.CABAL_VER }}-
+          ${{ runner.os }}-cabal-01-${{ env.GHC_VER }}-
       uses: actions/cache@v2
       name: Cache dependencies
-      id: cache
-    - if: ${{ !steps.cache.outputs.cache-hit }}
-      run: |
+    - run: |
         cabal build --only-dependencies
       name: Install dependencies
     - run: |
