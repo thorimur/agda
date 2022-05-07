@@ -39,8 +39,15 @@ jobs:
     needs: auto-cancel
     steps:
     - with:
+        fetch-depth: 0
         submodules: recursive
       uses: actions/checkout@v2
+    - run: |
+        for f in $(git ls-tree -r -t --full-name --name-only HEAD src/full) ; do
+          touch -t $(git log -1 --pretty=format:%cd --date=format:%Y%m%d%H%M.%S HEAD -- "$f") "$f";
+        done
+      name: Set all tracked file modification times in src/full to the time of their
+        last commit
     - with:
         cabal-version: ${{ matrix.cabal-ver }}
         ghc-version: ${{ matrix.ghc-ver }}
